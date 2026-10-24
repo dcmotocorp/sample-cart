@@ -28,7 +28,7 @@ class CheckoutSystemTests(TransactionTestCase):
         self.product = Product.objects.create(
             name="Test Product", unit_price_minor=99_999, inventory=100
         )
-        OrderCounter.objects.create(pk=1, last_order_number=0)
+        OrderCounter.objects.update_or_create(pk=1, defaults={"last_order_number": 0})
 
     def make_cart(self, product=None, quantity=1):
         product = product or self.product
@@ -299,6 +299,16 @@ class CheckoutSystemTests(TransactionTestCase):
             self.assertEqual(response.json()["error"]["code"], "VALIDATION_ERROR")
         unknown = self.client.post(url, {"product_id": 999_999, "quantity": 1}, format="json")
         self.assertEqual((unknown.status_code, unknown.json()["error"]["code"]), (404, "PRODUCT_NOT_FOUND"))
+        inactive = Product.objects.create(
+            name="Inactive", unit_price_minor=100, inventory=1, is_active=False
+        )
+        inactive_response = self.client.post(
+            url, {"product_id": inactive.id, "quantity": 1}, format="json"
+        )
+        self.assertEqual(
+            (inactive_response.status_code, inactive_response.json()["error"]["code"]),
+            (400, "VALIDATION_ERROR"),
+        )
         self.client.post(url, {"product_id": self.product.id, "quantity": 1}, format="json")
         self.client.post(
             f"/api/carts/{cart_id}/checkout",

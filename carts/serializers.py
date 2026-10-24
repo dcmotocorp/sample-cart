@@ -27,6 +27,36 @@ class UpdateCartItemSerializer(serializers.Serializer):
     quantity = StrictQuantityField()
 
 
+class CartWarningSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    product_id = serializers.IntegerField()
+    price_at_add_minor = serializers.IntegerField(required=False)
+    current_price_minor = serializers.IntegerField(required=False)
+    requested = serializers.IntegerField(required=False)
+    available = serializers.IntegerField(required=False)
+
+
+class CartLineSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    name = serializers.CharField()
+    quantity = serializers.IntegerField()
+    unit_price_minor = serializers.IntegerField()
+    price_at_add_minor = serializers.IntegerField()
+    line_total_minor = serializers.IntegerField()
+    warnings = CartWarningSerializer(many=True)
+
+
+class CartResponseSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    status = serializers.ChoiceField(choices=Cart.Status.choices)
+    currency = serializers.CharField()
+    items = CartLineSerializer(many=True)
+    subtotal_minor = serializers.IntegerField()
+    warnings = CartWarningSerializer(many=True)
+    created_at = serializers.DateTimeField()
+    updated_at = serializers.DateTimeField()
+
+
 def serialize_cart(cart):
     lines = []
     warnings = []

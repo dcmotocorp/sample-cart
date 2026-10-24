@@ -2,12 +2,14 @@ from django.db import transaction
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
 
 from catalog.models import Product
 from carts.models import Cart, CartItem
 from carts.serializers import (
     MAX_QUANTITY,
     AddCartItemSerializer,
+    CartResponseSerializer,
     UpdateCartItemSerializer,
     serialize_cart,
 )
@@ -41,17 +43,20 @@ def validate(serializer):
 
 
 class CartListCreateView(APIView):
+    @extend_schema(request=None, responses={201: CartResponseSerializer})
     def post(self, request):
         cart = Cart.objects.create()
         return Response(serialize_cart(cart), status=status.HTTP_201_CREATED)
 
 
 class CartDetailView(APIView):
+    @extend_schema(responses=CartResponseSerializer)
     def get(self, request, cart_id):
         return Response(serialize_cart(get_cart(cart_id)))
 
 
 class CartItemCreateView(APIView):
+    @extend_schema(request=AddCartItemSerializer, responses={200: CartResponseSerializer, 201: CartResponseSerializer})
     @transaction.atomic
     def post(self, request, cart_id):
         data = validate(AddCartItemSerializer(data=request.data))
@@ -94,6 +99,7 @@ class CartItemCreateView(APIView):
 
 
 class CartItemDetailView(APIView):
+    @extend_schema(request=UpdateCartItemSerializer, responses=CartResponseSerializer)
     @transaction.atomic
     def patch(self, request, cart_id, product_id):
         data = validate(UpdateCartItemSerializer(data=request.data))
@@ -110,6 +116,7 @@ class CartItemDetailView(APIView):
         cart.refresh_from_db()
         return Response(serialize_cart(cart))
 
+    @extend_schema(request=None, responses={204: None})
     @transaction.atomic
     def delete(self, request, cart_id, product_id):
         cart = get_cart(cart_id, lock=True)

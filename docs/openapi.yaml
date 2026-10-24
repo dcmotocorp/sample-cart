@@ -1,0 +1,842 @@
+openapi: 3.0.3
+info:
+  title: Reliable Checkout and Rewards API
+  version: 1.0.0
+paths:
+  /api/admin/coupons:
+    get:
+      operationId: api_admin_coupons_list
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Coupon'
+          description: ''
+  /api/admin/coupons/generate:
+    post:
+      operationId: api_admin_coupons_generate_create
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coupon'
+          description: ''
+  /api/admin/report:
+    get:
+      operationId: api_admin_report_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: ''
+  /api/carts:
+    post:
+      operationId: api_carts_create
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+          description: ''
+  /api/carts/{cart_id}:
+    get:
+      operationId: api_carts_retrieve
+      parameters:
+      - in: path
+        name: cart_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+          description: ''
+  /api/carts/{cart_id}/checkout:
+    post:
+      operationId: api_carts_checkout_create
+      parameters:
+      - in: path
+        name: cart_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CheckoutRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CheckoutRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutResponse'
+          description: ''
+  /api/carts/{cart_id}/items:
+    post:
+      operationId: api_carts_items_create
+      parameters:
+      - in: path
+        name: cart_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCartItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddCartItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddCartItem'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+          description: ''
+  /api/carts/{cart_id}/items/{product_id}:
+    patch:
+      operationId: api_carts_items_partial_update
+      parameters:
+      - in: path
+        name: cart_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: product_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItem'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+          description: ''
+    delete:
+      operationId: api_carts_items_destroy
+      parameters:
+      - in: path
+        name: cart_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: product_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/orders:
+    get:
+      operationId: api_orders_list
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+          description: ''
+  /api/orders/{order_id}:
+    get:
+      operationId: api_orders_retrieve
+      parameters:
+      - in: path
+        name: order_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/products:
+    get:
+      operationId: api_products_list
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+          description: ''
+  /api/schema/:
+    get:
+      operationId: api_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+components:
+  schemas:
+    AddCartItem:
+      type: object
+      properties:
+        product_id:
+          type: integer
+          minimum: 1
+        quantity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+      required:
+      - product_id
+      - quantity
+    CartLine:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        name:
+          type: string
+        quantity:
+          type: integer
+        unit_price_minor:
+          type: integer
+        price_at_add_minor:
+          type: integer
+        line_total_minor:
+          type: integer
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartWarning'
+      required:
+      - line_total_minor
+      - name
+      - price_at_add_minor
+      - product_id
+      - quantity
+      - unit_price_minor
+      - warnings
+    CartResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          $ref: '#/components/schemas/CartResponseStatusEnum'
+        currency:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartLine'
+        subtotal_minor:
+          type: integer
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartWarning'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - currency
+      - id
+      - items
+      - status
+      - subtotal_minor
+      - updated_at
+      - warnings
+    CartResponseStatusEnum:
+      enum:
+      - OPEN
+      - CHECKED_OUT
+      type: string
+      description: |-
+        * `OPEN` - Open
+        * `CHECKED_OUT` - Checked out
+    CartWarning:
+      type: object
+      properties:
+        code:
+          type: string
+        product_id:
+          type: integer
+        price_at_add_minor:
+          type: integer
+        current_price_minor:
+          type: integer
+        requested:
+          type: integer
+        available:
+          type: integer
+      required:
+      - code
+      - product_id
+    CheckoutRequest:
+      type: object
+      properties:
+        coupon_code:
+          type: string
+          maxLength: 10
+    CheckoutResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        order_number:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        cart_id:
+          type: integer
+          readOnly: true
+        currency:
+          type: string
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemSnapshot'
+          readOnly: true
+        subtotal_minor:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        discount_minor:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        final_total_minor:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        coupon_used:
+          allOf:
+          - $ref: '#/components/schemas/CouponSnapshot'
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        price_changed:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceChanged'
+      required:
+      - cart_id
+      - coupon_used
+      - created_at
+      - currency
+      - final_total_minor
+      - id
+      - items
+      - order_number
+      - price_changed
+      - subtotal_minor
+    Coupon:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 10
+        status:
+          $ref: '#/components/schemas/CouponStatusEnum'
+        milestone:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        percent:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        redeemed_at:
+          type: string
+          format: date-time
+          nullable: true
+        redeemed_by_order_id:
+          type: integer
+          readOnly: true
+          nullable: true
+      required:
+      - code
+      - created_at
+      - id
+      - milestone
+      - percent
+      - redeemed_by_order_id
+    CouponCounts:
+      type: object
+      properties:
+        generated:
+          type: integer
+        available:
+          type: integer
+        redeemed:
+          type: integer
+      required:
+      - available
+      - generated
+      - redeemed
+    CouponSnapshot:
+      type: object
+      properties:
+        code:
+          type: string
+        percent:
+          type: integer
+      required:
+      - code
+      - percent
+    CouponStatusEnum:
+      enum:
+      - AVAILABLE
+      - REDEEMED
+      type: string
+      description: |-
+        * `AVAILABLE` - Available
+        * `REDEEMED` - Redeemed
+    ItemSold:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        name:
+          type: string
+        quantity:
+          type: integer
+      required:
+      - name
+      - product_id
+      - quantity
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        order_number:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        cart_id:
+          type: integer
+          readOnly: true
+        currency:
+          type: string
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemSnapshot'
+          readOnly: true
+        subtotal_minor:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        discount_minor:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        final_total_minor:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        coupon_used:
+          allOf:
+          - $ref: '#/components/schemas/CouponSnapshot'
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - cart_id
+      - coupon_used
+      - created_at
+      - currency
+      - final_total_minor
+      - id
+      - items
+      - order_number
+      - subtotal_minor
+    OrderItemSnapshot:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        name:
+          type: string
+        unit_price_minor:
+          type: integer
+        quantity:
+          type: integer
+        line_total_minor:
+          type: integer
+      required:
+      - line_total_minor
+      - name
+      - product_id
+      - quantity
+      - unit_price_minor
+    PatchedUpdateCartItem:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+    PriceChanged:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        price_at_add_minor:
+          type: integer
+        charged_unit_price_minor:
+          type: integer
+      required:
+      - charged_unit_price_minor
+      - price_at_add_minor
+      - product_id
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        unit_price_minor:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        currency:
+          type: string
+          readOnly: true
+        inventory:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        is_active:
+          type: boolean
+      required:
+      - currency
+      - id
+      - inventory
+      - name
+      - unit_price_minor
+    Report:
+      type: object
+      properties:
+        items_sold_by_product:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemSold'
+        gross_revenue_minor:
+          type: integer
+        total_discount_minor:
+          type: integer
+        net_revenue_minor:
+          type: integer
+        coupons:
+          $ref: '#/components/schemas/CouponCounts'
+        total_orders:
+          type: integer
+      required:
+      - coupons
+      - gross_revenue_minor
+      - items_sold_by_product
+      - net_revenue_minor
+      - total_discount_minor
+      - total_orders
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

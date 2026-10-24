@@ -10,6 +10,6 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ["id", "name", "unit_price_minor", "currency", "inventory", "is_active"]
 
-    def get_currency(self, obj):
+    def get_currency(self, obj) -> str:
         return "INR"
 

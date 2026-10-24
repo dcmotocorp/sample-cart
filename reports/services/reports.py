@@ -1,4 +1,4 @@
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import Count, Max, Sum
 from django.db.models.functions import Coalesce
 
@@ -8,6 +8,11 @@ from orders.models import Order, OrderItem
 
 @transaction.atomic
 def build_report():
+    if connection.vendor == "postgresql":
+        # READ COMMITTED gives each statement a new snapshot. The report makes
+        # several aggregate queries and must reconcile as one point-in-time view.
+        with connection.cursor() as cursor:
+            cursor.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
     order_totals = Order.objects.aggregate(
         total_orders=Count("id"),
         gross=Coalesce(Sum("subtotal_minor"), 0),

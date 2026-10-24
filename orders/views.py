@@ -2,14 +2,16 @@ from rest_framework import status
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
 
 from config.errors import ServiceError
 from orders.models import Order
-from orders.serializers import CheckoutRequestSerializer, OrderSerializer
+from orders.serializers import CheckoutRequestSerializer, CheckoutResponseSerializer, OrderSerializer
 from orders.services.checkout import checkout_cart
 
 
 class CheckoutView(APIView):
+    @extend_schema(request=CheckoutRequestSerializer, responses={201: CheckoutResponseSerializer})
     def post(self, request, cart_id):
         idempotency_key = request.headers.get("Idempotency-Key", "").strip()
         if not idempotency_key:
