@@ -1,0 +1,16 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+db.sqlite3
+db.sqlite3-shm
+db.sqlite3-wal
+test_db.sqlite3
+test_db.sqlite3-shm
+test_db.sqlite3-wal
+.idea/
+.vscode/
+
