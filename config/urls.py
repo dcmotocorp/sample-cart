@@ -7,6 +7,8 @@ urlpatterns = [
     path("api/", include("catalog.urls")),
     path("api/", include("carts.urls")),
     path("api/", include("orders.urls")),
+    path("api/", include("coupons.urls")),
+    path("api/", include("reports.urls")),
     path("django-admin/", admin.site.urls),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(

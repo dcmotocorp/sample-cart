@@ -10,6 +10,7 @@ from django.utils import timezone
 from catalog.models import Product
 from carts.models import Cart
 from config.errors import ServiceError
+from coupons.models import Coupon
 from orders.models import IdempotencyRecord, Order, OrderCounter, OrderItem
 from orders.serializers import serialize_order
 from orders.services.payments import PaymentGatewayError, get_payment_gateway
@@ -126,10 +127,21 @@ def _checkout_once(*, cart_id, idempotency_key, payload, payload_digest, gateway
             status_code=409,
         )
 
-    if payload.get("coupon_code"):
-        raise ServiceError(
-            "COUPON_NOT_FOUND", "Coupon not found.", status_code=404
-        )
+    coupon = None
+    coupon_code = payload.get("coupon_code")
+    if coupon_code:
+        try:
+            coupon = Coupon.objects.select_for_update().get(code=coupon_code)
+        except Coupon.DoesNotExist as exc:
+            raise ServiceError(
+                "COUPON_NOT_FOUND", "Coupon not found.", status_code=404
+            ) from exc
+        if coupon.status != Coupon.Status.AVAILABLE:
+            raise ServiceError(
+                "COUPON_ALREADY_REDEEMED",
+                "This coupon has already been redeemed.",
+                status_code=409,
+            )
 
     line_values = []
     price_changed = []
@@ -148,6 +160,9 @@ def _checkout_once(*, cart_id, idempotency_key, payload, payload_digest, gateway
                 }
             )
 
+    discount = min(subtotal, subtotal * coupon.percent // 100) if coupon else 0
+    final_total = subtotal - discount
+
     counter, _ = OrderCounter.objects.get_or_create(pk=1, defaults={"last_order_number": 0})
     counter = OrderCounter.objects.select_for_update().get(pk=counter.pk)
     counter.last_order_number = F("last_order_number") + 1
@@ -158,8 +173,10 @@ def _checkout_once(*, cart_id, idempotency_key, payload, payload_digest, gateway
         cart=cart,
         order_number=counter.last_order_number,
         subtotal_minor=subtotal,
-        discount_minor=0,
-        final_total_minor=subtotal,
+        discount_minor=discount,
+        final_total_minor=final_total,
+        coupon_code=coupon.code if coupon else "",
+        coupon_percent=coupon.percent if coupon else None,
     )
     OrderItem.objects.bulk_create(
         [
@@ -177,6 +194,21 @@ def _checkout_once(*, cart_id, idempotency_key, payload, payload_digest, gateway
     for item, product, _ in line_values:
         product.inventory = F("inventory") - item.quantity
         product.save(update_fields=["inventory", "updated_at"])
+
+    if coupon:
+        redeemed = Coupon.objects.filter(
+            pk=coupon.pk, status=Coupon.Status.AVAILABLE
+        ).update(
+            status=Coupon.Status.REDEEMED,
+            redeemed_at=timezone.now(),
+            redeemed_by_order=order,
+        )
+        if redeemed != 1:
+            raise ServiceError(
+                "COUPON_ALREADY_REDEEMED",
+                "This coupon has already been redeemed.",
+                status_code=409,
+            )
 
     try:
         gateway.charge(
