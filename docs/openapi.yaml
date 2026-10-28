@@ -95,6 +95,13 @@ paths:
     post:
       operationId: api_carts_checkout_create
       parameters:
+      - in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+        description: Unique checkout-attempt key. Reuse the same key only when retrying
+          the same cart and request body.
+        required: true
       - in: path
         name: cart_id
         schema:

@@ -2,7 +2,8 @@ from rest_framework import status
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from config.errors import ServiceError
 from orders.models import Order
@@ -11,7 +12,22 @@ from orders.services.checkout import checkout_cart
 
 
 class CheckoutView(APIView):
-    @extend_schema(request=CheckoutRequestSerializer, responses={201: CheckoutResponseSerializer})
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="Idempotency-Key",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.HEADER,
+                required=True,
+                description=(
+                    "Unique checkout-attempt key. Reuse the same key only when "
+                    "retrying the same cart and request body."
+                ),
+            )
+        ],
+        request=CheckoutRequestSerializer,
+        responses={201: CheckoutResponseSerializer},
+    )
     def post(self, request, cart_id):
         idempotency_key = request.headers.get("Idempotency-Key", "").strip()
         if not idempotency_key:
